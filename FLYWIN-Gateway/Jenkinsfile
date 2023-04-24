@@ -1,0 +1,68 @@
+#!groovy
+pipeline {
+    //在任何可用的代理上执行Pipeline
+    agent any
+
+	triggers {
+		//每当COMAC-Core编译后，自动触发
+		upstream 'AutoBuild-FLYWIN-Core2.0'
+		
+		//有新代码提交将自动部署，
+		pollSCM ignorePostCommitHooks: true, scmpoll_spec: '* * * * *'
+	}
+
+    options {
+        //保留10天构建记录
+        buildDiscarder(logRotator(daysToKeepStr: '10'))
+		//不允许并行编译
+		disableConcurrentBuilds()
+    }
+    
+    //pipeline的各个阶段场景
+    stages {
+		stage('插入代码检查配置') {
+            steps {
+				echo "insert check......"
+				sh '''
+					sed \'/<\\/parent>/r ../scm/check/checkcode_profile.xml\' pom.xml > pom-scm.xml	
+					if [ -f "pom-scm.xml" ]; then
+						mv pom.xml pom-bak.xml
+						mv pom-scm.xml pom.xml
+					fi
+					'''
+            }
+        }
+		stage('编译打包') {
+            steps {
+              echo "starting building......"
+              sh '''mvn clean install spotbugs:spotbugs pmd:pmd -Dmaven.test.skip=true -Ptest'''
+            }
+        }
+		stage('静态检查') {
+            steps {
+                echo "starting codeAnalyze with checkstyle,findbugs,pmd......"
+                sh '''
+                    if [ ! -f "target/spotbugsXml.xml" ];then
+						echo "不检查 checkstyle"
+					else
+						java -cp /opt/jenkins/workspace/scm/checkstyle-8.11-all.jar com.puppycrawl.tools.checkstyle.Main -c /opt/jenkins/workspace/scm/caacitc_checks.xml -f xml -o target/checkstyle-result.xml src/main/java/com/flywin/
+					fi
+				'''
+				checkstyle canComputeNew: false, defaultEncoding: '', healthy: '80', pattern: '**/checkstyle-result.xml', thresholdLimit: 'normal', unHealthy: '40'
+				findbugs canComputeNew: false, defaultEncoding: '', excludePattern: '', healthy: '', includePattern: '', pattern: '**/spotbugsXml.xml', unHealthy: ''
+				pmd canComputeNew: false, defaultEncoding: '', healthy: '', pattern: '**/pmd.xml', unHealthy: ''
+            }
+        }
+        stage('构建归档 ') {
+            steps{
+                echo "starting archive artifacts......"
+                archiveArtifacts artifacts: 'target/*.jar', onlyIfSuccessful: true
+            }
+        }
+        stage('清理工作空间') {
+			steps {
+				cleanWs()
+			}
+        }
+    }
+}
