@@ -9,7 +9,6 @@
 package com.flywin.core.web.config;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.datatype.hibernate5.Hibernate5Module;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
@@ -29,24 +28,24 @@ import java.io.File;
 @Slf4j
 @Configuration
 public class WebConverterConfig {
-
-    /**
-     *
-     * @Title mappingJackson2HttpMessageConverter
-     * @Description 解决返回json数据会加载Lazy对象问题
-     * @return
-     * @return MappingJackson2HttpMessageConverter
-     * @author 曾明辉
-     * @date: 2019年8月14日
-     */
-    @Bean
-    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
-        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
-        ObjectMapper objectMapper = jsonConverter.getObjectMapper();
-        objectMapper.registerModule(new Hibernate5Module());
-
-        return jsonConverter;
-    }
+//
+//    /**
+//     *
+//     * @Title mappingJackson2HttpMessageConverter
+//     * @Description 解决返回json数据会加载Lazy对象问题
+//     * @return
+//     * @return MappingJackson2HttpMessageConverter
+//     * @author 曾明辉
+//     * @date: 2019年8月14日
+//     */
+//    @Bean
+//    public MappingJackson2HttpMessageConverter mappingJackson2HttpMessageConverter() {
+//        MappingJackson2HttpMessageConverter jsonConverter = new MappingJackson2HttpMessageConverter();
+//        ObjectMapper objectMapper = jsonConverter.getObjectMapper();
+//        objectMapper.registerModule(new Hibernate5Module());
+//
+//        return jsonConverter;
+//    }
 
     /**
      *

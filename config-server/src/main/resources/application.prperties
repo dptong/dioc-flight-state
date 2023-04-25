@@ -1,0 +1,13 @@
+server.port=8888
+
+spring.application.name=config-server
+
+#uri 表示配置中心所在仓库的位置(GitHub站点访问较慢由于网络比较慢，可能连接失败;此处我们使用国内码云gitee（)
+spring.cloud.config.server.git.uri=https://gitee.com/xx/springcloud-config.git
+#search-paths 表示仓库下的子目录
+spring.cloud.config.server.git.search-paths=config-center
+#GitHub 用户名，密码（如果Git仓库为公开仓库，可以不填写用户名和密码）
+spring.cloud.config.server.git.username=xx
+spring.cloud.config.server.git.password=xx
+# 忽略ssl或者自动填充公钥
+spring.cloud.config.server.git.skip-ssl-validation=true

@@ -12,8 +12,10 @@
 
     <modules>
         <module>FLYWIN-Core</module>
-        <module>FLYWIN-FileServers</module>
+        <module>fliht-state</module>
+        <module>eureka-server</module>
         <module>FLYWIN-Gateway</module>
+        <module>eureka-server</module>
     </modules>
 
     <properties>
