@@ -1,6 +1,8 @@
-package com.flywin.core.repository.mybaitis;
+package com.flywin.core.mybatis;
 
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -13,7 +15,12 @@ import java.time.LocalDateTime;
  * @create: 2023-04-24 10:48
  **/
 @Data
-public class MybatisBaseEntity implements Serializable {
+public class MBaseEntity implements Serializable {
+    /**
+     * @desc 自增主键
+     */
+    @TableId(value = "id", type = IdType.ASSIGN_ID)
+    private Long id;
 
     /**
      * @desc 创建人工号

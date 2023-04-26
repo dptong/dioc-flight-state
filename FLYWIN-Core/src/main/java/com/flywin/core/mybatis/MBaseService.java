@@ -6,25 +6,24 @@
  * <li>修改人：
  * <li>修改日期：
  */
-package com.flywin.core.service;
+package com.flywin.core.mybatis;
 
+import cn.hutool.core.util.ReflectUtil;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.flywin.core.dto.SysLoginUser;
 import com.flywin.core.exception.BusinessException;
-import com.flywin.core.repository.mybaitis.MybatisBaseEntity;
 import com.flywin.redis.RedisLoginUserManager;
 import com.flywin.utils.TokenUtils;
 import com.flywin.utils.WebUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -34,18 +33,23 @@ import java.util.List;
  * @author: 曾明辉
  * @date: 2019年8月14日
  */
-public class MybatisBaseService<M extends BaseMapper<T>, T extends MybatisBaseEntity> extends ServiceImpl<M, T> {
+public class MBaseService<M extends BaseMapper<T>, T extends MBaseEntity> extends ServiceImpl<M, T> {
 
     /**
      * 日志
      */
-    private final Logger logger = LoggerFactory.getLogger(MybatisBaseService.class);
+    private final Logger logger = LoggerFactory.getLogger(MBaseService.class);
 
     /**
      * 用户Redis管理类
      */
     @Autowired
     private RedisLoginUserManager redisLoginUserManager;
+
+    /**
+     * 实体的类对象
+     */
+    Class<T> clazz;
 
     /**
      * @param id 对象
@@ -57,63 +61,24 @@ public class MybatisBaseService<M extends BaseMapper<T>, T extends MybatisBaseEn
      * @date: 2019年8月14日
      */
     public T get(Serializable id) throws Exception {
-        return this.get(id);
-    }
-
-    /**
-     * @return List<T>
-     * @throws Exception 异常
-     * @Title findAll
-     * @Description TODO
-     * @author 曾明辉
-     * @date: 2019年8月14日
-     */
-    public List<T> findAll() throws Exception {
-        return this.findAll();
-    }
-
-    /**
-     * @param example 查找对象模板
-     * @return List<T>
-     * @throws Exception 异常
-     * @Title find
-     * @Description TODO
-     * @author 曾明辉
-     * @date: 2019年8月14日
-     */
-    public List<T> find(T example) throws Exception {
-        example.setIsDelete(false); // 增加默认查询条件
-        return this.find(example);
-    }
-
-
-    /**
-     * @param pageable 翻页
-     * @param example  查找对象模板
-     * @return Page<T>
-     * @throws Exception 异常
-     * @Title findPage
-     * @Description TODO
-     * @author 曾明辉
-     * @date: 2019年8月14日
-     */
-    public Page<T> findPage(Pageable pageable, T example) throws Exception {
-        example.setIsDelete(false); // 增加默认查询条件
-        return this.findPage(pageable, example);
+        return this.baseMapper.selectById(id);
     }
 
     /**
      * @param entityList 对象List
      * @return List<T>
      * @throws Exception 异常
-     * @Title saveAll
+     * @Title insertAll
      * @Description TODO
      * @author 曾明辉
      * @date: 2019年8月14日
      */
     @Transactional(rollbackFor = Exception.class)
-    public List<T> saveAll(List<T> entityList) throws Exception {
-        return this.saveAll(entityList);
+    public Boolean insertAll(List<T> entityList) throws Exception {
+        for (T entity: entityList) {
+            this.baseMapper.insert(entity);
+        }
+        return true;
     }
 
     /**
@@ -126,7 +91,7 @@ public class MybatisBaseService<M extends BaseMapper<T>, T extends MybatisBaseEn
      */
     @Transactional(rollbackFor = Exception.class)
     public void deleteById(Serializable id) throws Exception {
-        this.deleteById(id);
+        this.baseMapper.deleteById(id);
     }
 
     /**
@@ -139,14 +104,11 @@ public class MybatisBaseService<M extends BaseMapper<T>, T extends MybatisBaseEn
      */
     @Transactional(rollbackFor = Exception.class)
     public void deleteByIds(Serializable[] ids) throws Exception {
-        for (Serializable id : ids) {
-            this.deleteById(id);
-        }
+        this.baseMapper.deleteBatchIds(Arrays.asList(ids));
     }
 
     /**
      * @param id        对象id
-     * @param loginUser 登录用户
      * @throws Exception 异常
      * @Title softDeleteById
      * @Description TODO
@@ -154,13 +116,15 @@ public class MybatisBaseService<M extends BaseMapper<T>, T extends MybatisBaseEn
      * @date: 2019年8月12日
      */
     @Transactional(rollbackFor = Exception.class)
-    public void softDeleteById(Serializable id, SysLoginUser loginUser) throws Exception {
-
+    public void softDeleteById(Serializable id) throws Exception {
+        T deleteEntity = ReflectUtil.newInstance(clazz);
+        deleteEntity.setIsDelete(true);
+        deleteEntity.setId((Long) id);
+        this.baseMapper.updateById(deleteEntity);
     }
 
     /**
      * @param ids       对象id数字
-     * @param loginUser 登录用户
      * @throws Exception 异常
      * @Title softDeleteByIds
      * @Description TODO
@@ -168,8 +132,10 @@ public class MybatisBaseService<M extends BaseMapper<T>, T extends MybatisBaseEn
      * @date: 2019年8月14日
      */
     @Transactional(rollbackFor = Exception.class)
-    public void softDeleteByIds(Serializable[] ids, SysLoginUser loginUser) throws Exception {
-
+    public void softDeleteByIds(Serializable[] ids) throws Exception {
+        for (Serializable id: ids) {
+            this.deleteById(id);
+        }
     }
 
     /**

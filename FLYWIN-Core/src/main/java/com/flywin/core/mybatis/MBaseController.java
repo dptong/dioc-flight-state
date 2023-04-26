@@ -6,29 +6,21 @@
  * <li>修改人：
  * <li>修改日期：
  */
-package com.flywin.core.web;
+package com.flywin.core.mybatis;
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.flywin.core.dto.SysLoginUser;
-import com.flywin.core.repository.entity.page.PageSearch;
-import com.flywin.core.repository.mybaitis.MybatisBaseEntity;
-import com.flywin.core.service.MybatisBaseService;
 import com.flywin.core.web.response.ResponseResult;
 import com.flywin.core.web.response.ResponseUtils;
 import com.flywin.log.annotation.RequestLog;
 import com.flywin.redis.RedisLoginUserManager;
-import com.flywin.utils.TokenUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.List;
+import java.io.Serializable;
 
 /**
  * @param <T> 实体对象
@@ -38,8 +30,9 @@ import java.util.List;
  * @author: 曾明辉
  * @date: 2019年8月14日
  */
-public class MBaseController<T extends MybatisBaseEntity, M extends BaseMapper<T>,
-        S extends MybatisBaseService<M, T>> {
+@Controller
+public class MBaseController<T extends MBaseEntity, M extends BaseMapper<T>,
+        S extends MBaseService<M, T>> {
 
     /**
      * 日志
@@ -74,9 +67,15 @@ public class MBaseController<T extends MybatisBaseEntity, M extends BaseMapper<T
      * @author 曾明辉
      * @date: 2019年8月14日
      */
-    @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
-    public ResponseResult<T> get(@PathVariable("id") String id) throws Exception {
-        T entity = this.baseService.get(id);
+//    @RequestMapping(value = "/get/{id}", method = RequestMethod.GET)
+//    public ResponseResult<T> get(@PathVariable("id") String id) throws Exception {
+//        T entity = this.baseService.get(id);
+//        return ResponseUtils.success(entity);
+//    }
+
+    @RequestMapping(value = "/get", method = RequestMethod.GET)
+    public ResponseResult<T> get(@RequestParam("id") Serializable id) throws Exception {
+        T entity =  this.baseService.get(id);
         return ResponseUtils.success(entity);
     }
 
@@ -93,40 +92,6 @@ public class MBaseController<T extends MybatisBaseEntity, M extends BaseMapper<T
     public ResponseResult<T> getDetail(@PathVariable("id") String id) throws Exception {
         T entity = this.baseService.get(id);
         return ResponseUtils.success(entity);
-    }
-
-
-    /**
-     * @param searchEntity 查询对象模板
-     * @return
-     * @return ResponseResult<List < T>> 列表格式化结果
-     * @throws Exception 异常
-     * @Title find
-     * @Description TODO
-     * @author 曾明辉
-     * @date: 2019年8月14日
-     */
-    @RequestMapping(value = "/find", method = RequestMethod.POST)
-    public ResponseResult<List<T>> find(@RequestBody T searchEntity) throws Exception {
-        List<T> datas = this.baseService.find(searchEntity);
-        return ResponseUtils.success(datas);
-    }
-
-
-    /**
-     * @param pageSearch 查询对象模板
-     * @return
-     * @return ResponseResult<List < T>> 翻页对象格式化结果
-     * @throws Exception 异常
-     * @Title findPage
-     * @Description TODO
-     * @author 曾明辉
-     * @date: 2019年8月14日
-     */
-    @RequestMapping(value = "/findPage", method = RequestMethod.POST)
-    public ResponseResult<Page<T>> findPage(@RequestBody PageSearch<T> pageSearch) throws Exception {
-        Page<T> page = this.baseService.findPage(pageSearch.getPageRequst(), pageSearch.getSearchExmaple());
-        return ResponseUtils.success(page);
     }
 
 
@@ -177,7 +142,7 @@ public class MBaseController<T extends MybatisBaseEntity, M extends BaseMapper<T
     @RequestLog(name = "软删除", description = "通用软删除方法")
     @RequestMapping(value = "/softDeleteById/{id}", method = RequestMethod.POST)
     public ResponseResult<T> softDeleteById(@PathVariable("id") String id) throws Exception {
-        this.baseService.softDeleteById(id, this.getLoginUser());
+        this.baseService.softDeleteById(id);
         return ResponseUtils.success();
     }
 
@@ -194,21 +159,7 @@ public class MBaseController<T extends MybatisBaseEntity, M extends BaseMapper<T
     @RequestLog(name = "批量软删除", description = "通用批量软删除方法")
     @RequestMapping(value = "/softDeleteByIds", method = RequestMethod.POST)
     public ResponseResult<T> softDeleteByIds(@RequestBody String[] ids) throws Exception {
-        this.baseService.softDeleteByIds(ids, this.getLoginUser());
+        this.baseService.softDeleteByIds(ids);
         return ResponseUtils.success();
-    }
-
-    /**
-     * @return SysLoginUser 登录对象
-     * @Title getLoginUser
-     * @Description 得到登录对象
-     * @author 曾明辉
-     * @date: 2019年8月14日
-     */
-    protected SysLoginUser getLoginUser() {
-
-        String token = TokenUtils.getRequestToken(request);
-
-        return this.redisLoginUserManager.getLoginUserByToken(token);
     }
 }

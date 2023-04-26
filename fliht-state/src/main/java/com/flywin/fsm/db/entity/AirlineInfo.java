@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.flywin.core.repository.mybaitis.MybatisBaseEntity;
+import com.flywin.core.mybatis.MBaseEntity;
 import lombok.Data;
 
 /**
@@ -14,8 +14,8 @@ import lombok.Data;
  * @create: 2023-04-25 15:36
  **/
 @Data
-@TableName("aifd_airline_info")
-public class AirlineInfo extends MybatisBaseEntity {
+@TableName("airline_info")
+public class AirlineInfo extends MBaseEntity {
     /**
      * @desc 自增主键
      */

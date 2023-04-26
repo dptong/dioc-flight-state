@@ -22,11 +22,7 @@ import springfox.documentation.swagger2.annotations.EnableSwagger2;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @Description:
- * @author: 李正杭
- * @date: 2019年7月5日
- */
+
 @Configuration
 @EnableSwagger2
 public class Swagger2Configuration {
@@ -46,8 +42,10 @@ public class Swagger2Configuration {
         tokenPar.name("Authorization").description("令牌").modelRef(new ModelRef("string")).parameterType("header")
                 .required(false).build();
         pars.add((springfox.documentation.service.Parameter) tokenPar.build());
-        return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select()
-                .apis(RequestHandlerSelectors.basePackage("com.flywin.fileservers.controller"))
+        return new Docket(DocumentationType.SWAGGER_2)
+                .apiInfo(apiInfo())
+                .select()
+                .apis(RequestHandlerSelectors.basePackage("com.flywin"))
                 .paths(PathSelectors.any()).build().globalOperationParameters(pars);
 
     }
@@ -61,6 +59,6 @@ public class Swagger2Configuration {
      * @date: 2019年8月19日
      */
     private ApiInfo apiInfo() {
-        return new ApiInfoBuilder().title("flywin文件服务api文档").description("文件服务api文档").version("1.0").build();
+        return new ApiInfoBuilder().title("飞机参数配置api文档").description("飞机参数配置api文档").version("1.0").build();
     }
 }

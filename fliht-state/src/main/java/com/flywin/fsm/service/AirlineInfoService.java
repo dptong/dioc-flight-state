@@ -1,6 +1,6 @@
 package com.flywin.fsm.service;
 
-import com.flywin.core.service.MybatisBaseService;
+import com.flywin.core.mybatis.MBaseService;
 import com.flywin.fsm.db.entity.AirlineInfo;
 import com.flywin.fsm.db.mapper.AirlineInfoMapper;
 import org.springframework.stereotype.Service;
@@ -12,5 +12,5 @@ import org.springframework.stereotype.Service;
  * @create: 2023-04-25 16:50
  **/
 @Service
-public class AirlineInfoService extends MybatisBaseService<AirlineInfoMapper, AirlineInfo> {
+public class AirlineInfoService extends MBaseService<AirlineInfoMapper, AirlineInfo> {
 }
